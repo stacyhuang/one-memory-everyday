@@ -9,6 +9,7 @@ import React, {
   TouchableHighlight
 } from 'react-native';
 
+import Icon from 'react-native-vector-icons/FontAwesome';
 import Note from './Note';
 import api from '../Utils/api';
 import Separator from './Helpers/Separator';
@@ -44,12 +45,16 @@ class Main extends Component {
       })
   }
 
-  handleSubmit() {
+  handleNewNote() {
     this.props.navigator.push({
       title: 'New Note',
       component: Note,
       passProps: { onNewNote: this.getMemories.bind(this) }
     });
+  }
+
+  handleNewPhoto() {
+    //
   }
 
   renderRow(rowData) {
@@ -72,9 +77,15 @@ class Main extends Component {
       <View style={styles.footerContainer}>
         <TouchableHighlight
           style={styles.button}
-          onPress={this.handleSubmit.bind(this)}
+          onPress={this.handleNewNote.bind(this)}
           underlayColor='#88D4F5'>
-            <Text style={styles.buttonText}>+</Text>
+            <Icon name="pencil" style={styles.buttonText} />
+        </TouchableHighlight>
+        <TouchableHighlight
+          style={styles.button}
+          onPress={this.handleNewPhoto.bind(this)}
+          underlayColor='#88D4F5'>
+            <Icon name="camera-retro" style={styles.buttonText}/>
         </TouchableHighlight>
       </View>
     )
@@ -120,7 +131,8 @@ var styles = StyleSheet.create({
   button: {
     width: 60,
     height: 60,
-    backgroundColor: '#48BBEC',
+    // backgroundColor: '#48BBEC',
+    borderColor: 'white',
     alignItems: 'center',
     justifyContent: 'center'
   },
