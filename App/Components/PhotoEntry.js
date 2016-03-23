@@ -2,9 +2,11 @@ import React, {
   Component,
   Text,
   View,
+  Image,
   TextInput,
   Dimensions,
   TouchableHighlight,
+  ScrollView,
   StyleSheet
 } from 'react-native';
 
@@ -12,13 +14,22 @@ import moment from 'moment';
 import api from '../Utils/api';
 
 let ScreenHeight = Dimensions.get("window").height;
+let ScreenWidth = Dimensions.get("window").width;
 
-class Note extends Component {
+class PhotoEntry extends Component {
   constructor(props) {
     super(props);
     this.state = {
       note: ''
     }
+  }
+
+  componentDidMount() {
+    this.props.events.addListener('submitNewEntry', this.handleSubmit.bind(this));
+  }
+
+  componentWillUnmount() {
+    this.props.events.removeAllListeners();
   }
 
   handleChange(event) {
@@ -31,7 +42,8 @@ class Note extends Component {
     var currentDate = moment().format("YYYY-MM-DD");
     var memory = {
       date: currentDate,
-      type: 'note',
+      type: 'photo',
+      image_url: this.props.image_url,
       text: this.state.note
     };
 
@@ -41,31 +53,29 @@ class Note extends Component {
 
     api.addMemory(memory)
       .then((res) => {
-        this.props.onNewNote();
+        this.props.onNewEntry();
         this.props.navigator.pop();
       })
       .catch((error) => {
         console.log('Request failed', error);
-        this.setState({ error });
       });
   }
 
   render() {
+    // 'Warning: ScrollView doesn't take rejection well' - This is an upstream issue that hasn't been fixed
+    // https://github.com/facebook/react-native/issues/1501
     return (
       <View style={styles.container}>
-        <TextInput
-          style={styles.searchInput}
+        <ScrollView>
+          <TextInput
+          style={styles.noteInput}
           value={this.state.note}
           onChange={this.handleChange.bind(this)}
           multiline={true}
           maxLength={140}
-          placeholder='New Note' />
-        <TouchableHighlight
-          style={styles.button}
-          onPress={this.handleSubmit.bind(this)}
-          underlayColor='#88D4F5'>
-            <Text style={styles.buttonText}>Submit</Text>
-        </TouchableHighlight>
+          placeholder='Say something about this photo...' />
+          <Image source={{uri: this.props.image_url}} style={styles.photo} />
+        </ScrollView>
       </View>
     )
   }
@@ -76,25 +86,19 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
   },
-  searchInput: {
-    height: ScreenHeight - 65 - 60, // screen height - title bar height - button height
-    marginTop: 65,
+  noteInput: {
+    flex: 1,
+    height: 65,
     padding: 10,
     fontSize: 18,
     color: '#111',
-    justifyContent: 'flex-start',
   },
-  button: {
-    height: 60,
-    backgroundColor: '#48BBEC',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white'
+  photo: {
+    flex: 2,
+    width: ScreenWidth,
+    height: ScreenWidth,
+    alignSelf: 'center'
   }
 });
 
-
-module.exports = Note;
+module.exports = PhotoEntry;
