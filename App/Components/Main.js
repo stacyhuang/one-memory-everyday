@@ -16,8 +16,10 @@ import Subscribable from 'Subscribable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import NoteEntry from './NoteEntry';
 import PhotoEntry from './PhotoEntry';
-import api from '../Utils/api';
+import MemoryView from './MemoryView';
 import Separator from './Helpers/Separator';
+import api from '../Utils/api';
+import ImagePickerOptions from '../Utils/ImagePickerOptions';
 
 class Main extends Component {
   constructor(props) {
@@ -55,39 +57,16 @@ class Main extends Component {
   }
 
   launchPicker() {
-    var options = {
-      title: 'Upload Photo', // specify null or empty string to remove the title
-      cancelButtonTitle: 'Cancel',
-      takePhotoButtonTitle: 'Take Photo...', // specify null or empty string to remove this button
-      chooseFromLibraryButtonTitle: 'Choose from Library...', // specify null or empty string to remove this button
-      cameraType: 'back', // 'front' or 'back'
-      mediaType: 'photo', // 'photo' or 'video'
-      videoQuality: 'high', // 'low', 'medium', or 'high'
-      durationLimit: 10, // video recording max time in seconds
-      // maxWidth: 100, // photos only
-      // maxHeight: 100, // photos only
-      quality: 1, // 0 to 1, photos only
-      allowsEditing: true, // Built in functionality to resize/reposition the image after selection
-      noData: false, // photos only - disables the base64 `data` field from being generated (greatly improves performance on large photos)
-      storageOptions: { // if this key is provided, the image will get saved in the documents directory on ios, and the pictures directory on android (rather than a temporary directory)
-        skipBackup: true, // ios only - image will NOT be backed up to icloud
-        path: 'images' // ios only - will save image at /Documents/images rather than the root
-      }
-    };
-
-    ImagePickerManager.showImagePicker(options, (response) => {
+    ImagePickerManager.showImagePicker(ImagePickerOptions.photo, (response) => {
       console.log('Response = ', response);
 
       if (response.didCancel) {
         console.log('User cancelled image picker');
-      }
-      else if (response.error) {
+      } else if (response.error) {
         console.log('ImagePickerManager Error: ', response.error);
-      }
-      else if (response.customButton) {
+      } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
-      }
-      else {
+      } else {
         const source = {uri: response.uri.replace('file://', ''), isStatic: true};
 
         this.setState({
@@ -98,13 +77,15 @@ class Main extends Component {
           title: 'New Memory',
           component: PhotoEntry,
           rightButtonTitle: 'Submit',
+          leftButtonTitle: 'Cancel',
+          onRightButtonPress: this.onSubmitNewEntry.bind(this),
+          onLeftButtonPress: () => this.props.navigator.pop(),
           passProps: {
             image_url: this.state.imageSource.uri,
             onNewEntry: this.getMemories.bind(this),
             events: this.eventEmitter
           },
-          onRightButtonPress: this.onSubmitNewEntry.bind(this)
-        })
+        });
       }
     });
   }
@@ -114,43 +95,44 @@ class Main extends Component {
       title: 'New Memory',
       component: NoteEntry,
       rightButtonTitle: 'Submit',
+      leftButtonTitle: 'Cancel',
+      onRightButtonPress: this.onSubmitNewEntry.bind(this),
+      onLeftButtonPress: () => this.props.navigator.pop(),
       passProps: {
         onNewEntry: this.getMemories.bind(this),
         events: this.eventEmitter
-      },
-      onRightButtonPress: this.onSubmitNewEntry.bind(this)
+      }
     });
   }
 
-  handleNewPhoto() {
-    var currentDate = moment().format("YYYY-MM-DD");
-    var memory = {
-      date: currentDate,
-      type: 'photo',
-      image_url: this.state.imageSource.uri,
-      text: 'Some note'
-    };
-
-    api.addMemory(memory)
-      .then((res) => {
-        this.getMemories();
-      })
-      .catch((error) => {
-        console.log('Request failed', error);
-        this.setState({ error });
-      });
+  displayMemory(memory) {
+    this.props.navigator.push({
+      title: 'One Memory Everyday',
+      component: MemoryView,
+      leftButtonTitle: 'Back',
+      onLeftButtonPress: () => this.props.navigator.pop(),
+      passProps: {
+        memory: memory
+      }
+    });
   }
 
   renderRow(rowData) {
     var image = rowData.image_url ? <Image source={{uri: rowData.image_url}} style={styles.photo} /> : <View></View>;
+    var date = moment(rowData.date).format('MMMM DD');
     return (
       <View>
-        <View style={styles.rowContainer}>
-          {image}
-          <Text style={rowData.type === 'photo' && styles.noteWithPhoto}>
-            {rowData.text}
-          </Text>
-        </View>
+        <TouchableHighlight
+          onPress={this.displayMemory.bind(this, rowData)}
+          underlayColor='#F8F8F8'>
+          <View style={styles.rowContainer}>
+            {image}
+            <View style={[styles.rowContainerRight, rowData.type === 'photo' && styles.rowContainerRightWithPhoto]}>
+              <Text style={styles.noteContainer}>{rowData.text}</Text>
+              <Text style={styles.dateContainter}>{date}</Text>
+            </View>
+          </View>
+        </TouchableHighlight>
         <Separator />
       </View>
     )
@@ -180,7 +162,7 @@ class Main extends Component {
       <View style={styles.container}>
         <ListView
           dataSource={this.state.dataSource}
-          renderRow={this.renderRow} />
+          renderRow={this.renderRow.bind(this)} />
         {this.footer()}
       </View>
     )
@@ -193,10 +175,10 @@ var styles = StyleSheet.create({
     flexDirection: 'column'
   },
   rowContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 10,
-    justifyContent: 'center',
-    height: 95, // photo height + top and botton paddings
+    height: 95, // photo height + top and bottom paddings
   },
   photo: {
     width: 75,
@@ -204,22 +186,47 @@ var styles = StyleSheet.create({
     position: 'absolute',
     top: 10 // container top padding
   },
-  noteWithPhoto: {
+  rowContainerRight: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  rowContainerRightWithPhoto: {
     marginLeft: 85 // photo width + margin of 10
   },
-  footerContainer: {
+  noteContainer: {
+    flex: 1,
+    color: '#494949',
+    fontSize: 16,
+    lineHeight: 22
+  },
+  dateContainter: {
     backgroundColor: '#48BBEC',
-    justifyContent: 'center',
-    flexDirection: 'row'
+    textAlign: 'center',
+    width: 75,
+    height: 75,
+    padding: 5,
+    paddingTop: 14, // Todo: use flexbox to vertically align intead of brute force
+    lineHeight: 22, // Todo: use flexbox to vertically align intead of brute force
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderRadius: 5
+  },
+  footerContainer: {
+    backgroundColor: '#272727',
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   button: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 50,
+    marginHorizontal: 5,
     alignItems: 'center',
     justifyContent: 'center'
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 32, // size of icon
     color: 'white'
   }
 });

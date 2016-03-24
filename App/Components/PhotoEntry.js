@@ -65,13 +65,14 @@ class PhotoEntry extends Component {
     // 'Warning: ScrollView doesn't take rejection well' - This is an upstream issue that hasn't been fixed
     // https://github.com/facebook/react-native/issues/1501
     return (
-      <View style={styles.container}>
-        <ScrollView>
+      <View>
+        <ScrollView style={styles.container}>
           <TextInput
           style={styles.noteInput}
           value={this.state.note}
           onChange={this.handleChange.bind(this)}
           multiline={true}
+          autoFocus={true}
           maxLength={140}
           placeholder='Say something about this photo...' />
           <Image source={{uri: this.props.image_url}} style={styles.photo} />
@@ -85,19 +86,17 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
+    height: ScreenHeight
   },
   noteInput: {
-    flex: 1,
-    height: 65,
+    height: 110,
     padding: 10,
     fontSize: 18,
     color: '#111',
   },
   photo: {
-    flex: 2,
     width: ScreenWidth,
     height: ScreenWidth,
-    alignSelf: 'center'
   }
 });
 

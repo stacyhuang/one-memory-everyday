@@ -65,6 +65,7 @@ class NoteEntry extends Component {
           value={this.state.note}
           onChange={this.handleChange.bind(this)}
           multiline={true}
+          autoFocus={true}
           maxLength={140}
           placeholder='New Note' />
       </View>
@@ -78,7 +79,7 @@ var styles = StyleSheet.create({
     marginTop: 65,
   },
   noteInput: {
-    height: 65, 
+    height: ScreenHeight,
     padding: 10,
     fontSize: 18,
     color: '#111',
