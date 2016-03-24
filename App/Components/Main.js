@@ -14,6 +14,7 @@ import moment from 'moment';
 import EventEmitter from 'EventEmitter';
 import Subscribable from 'Subscribable';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Swipeout from 'react-native-swipeout';
 import NoteEntry from './NoteEntry';
 import PhotoEntry from './PhotoEntry';
 import MemoryView from './MemoryView';
@@ -53,7 +54,17 @@ class Main extends Component {
       })
       .catch((error) => {
         console.log('Error loading memories', error);
+      });
+  }
+
+  deleteMemory(id) {
+    api.deleteMemory(id)
+      .then((res) => {
+        this.getMemories();
       })
+      .catch((error) => {
+        console.log('Error deleting memory', error);
+      });
   }
 
   launchPicker() {
@@ -117,11 +128,21 @@ class Main extends Component {
     });
   }
 
-  renderRow(rowData) {
+  renderRow(rowData, sectionID, rowID) {
     var image = rowData.image_url ? <Image source={{uri: rowData.image_url}} style={styles.photo} /> : <View></View>;
     var date = moment(rowData.date).format('MMMM DD');
+
+    let swipeBtns = [{
+      text: 'Delete',
+      backgroundColor: 'red',
+      underlayColor: '#F8F8F8',
+      onPress: () => { this.deleteMemory(rowID) }
+    }]
+
     return (
-      <View>
+      <Swipeout right={swipeBtns}
+        autoClose='true'
+        backgroundColor='transparent'>
         <TouchableHighlight
           onPress={this.displayMemory.bind(this, rowData)}
           underlayColor='#F8F8F8'>
@@ -134,7 +155,7 @@ class Main extends Component {
           </View>
         </TouchableHighlight>
         <Separator />
-      </View>
+      </Swipeout>
     )
   }
 
