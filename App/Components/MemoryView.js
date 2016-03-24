@@ -9,11 +9,11 @@ import React, {
   StyleSheet
 } from 'react-native';
 
-let ScreenHeight = Dimensions.get("window").height;
-let ScreenWidth = Dimensions.get("window").width;
-
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
+
+let ScreenHeight = Dimensions.get("window").height;
+let ScreenWidth = Dimensions.get("window").width;
 
 class MemoryView extends Component {
   footer() {
@@ -29,8 +29,9 @@ class MemoryView extends Component {
   }
 
   render() {
-    var image = this.props.memory.type === 'photo' ? <Image source={{uri: this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
-    var date = moment(this.props.memory.date).format('MMMM DD, YYYY');
+    let image = this.props.memory.type === 'photo' ? <Image source={{uri: this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
+    let date = moment(this.props.memory.date).format('MMMM DD, YYYY');
+
     return (
       <View style={styles.container}>
         <ScrollView>

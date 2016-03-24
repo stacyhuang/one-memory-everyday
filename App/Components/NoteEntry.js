@@ -36,8 +36,9 @@ class NoteEntry extends Component {
   }
 
   handleSubmit() {
-    var currentDate = moment().format("YYYY-MM-DD");
-    var memory = {
+    let currentDate = moment().format("YYYY-MM-DD");
+    
+    let memory = {
       date: currentDate,
       type: 'note',
       text: this.state.note

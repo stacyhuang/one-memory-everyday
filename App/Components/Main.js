@@ -6,10 +6,11 @@ import React, {
   StyleSheet,
   ListView,
   TextInput,
-  TouchableHighlight
+  TouchableHighlight,
+  NativeModules
 } from 'react-native';
 
-var ImagePickerManager = require('NativeModules').ImagePickerManager;
+const ImagePickerManager = NativeModules.ImagePickerManager;
 import moment from 'moment';
 import EventEmitter from 'EventEmitter';
 import Subscribable from 'Subscribable';
@@ -25,7 +26,11 @@ import ImagePickerOptions from '../Utils/ImagePickerOptions';
 class Main extends Component {
   constructor(props) {
     super(props);
-    this.ds = new ListView.DataSource({rowHasChanged: (row1, row2) => row1 !== row2});
+
+    this.ds = new ListView.DataSource({
+      rowHasChanged: (row1, row2) => row1 !== row2
+    });
+
     this.state = {
       dataSource: this.ds.cloneWithRows([]),
       imageSource: null
@@ -129,8 +134,8 @@ class Main extends Component {
   }
 
   renderRow(rowData, sectionID, rowID) {
-    var image = rowData.image_url ? <Image source={{uri: rowData.image_url}} style={styles.photo} /> : <View></View>;
-    var date = moment(rowData.date).format('MMMM DD');
+    let image = rowData.image_url ? <Image source={{uri: rowData.image_url}} style={styles.photo} /> : <View></View>;
+    let date = moment(rowData.date).format('MMMM DD');
 
     let swipeBtns = [{
       text: 'Delete',
