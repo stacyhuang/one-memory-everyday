@@ -57,16 +57,17 @@ var styles = StyleSheet.create({
     height: ScreenWidth
   },
   containerBottom: {
-    padding: 15
+    paddingHorizontal: 15,
+    paddingVertical: 10
   },
   dateContainer: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#CCCBC6',
     marginBottom: 5
   },
   noteContainer: {
-    fontSize: 22,
+    fontSize: 20,
   },
   footerContainer: {
     backgroundColor: '#272727',

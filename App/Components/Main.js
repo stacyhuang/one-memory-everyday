@@ -20,8 +20,8 @@ import NoteEntry from './NoteEntry';
 import PhotoEntry from './PhotoEntry';
 import MemoryView from './MemoryView';
 import Separator from './Helpers/Separator';
-import api from '../Utils/api';
 import ImagePickerOptions from '../Utils/ImagePickerOptions';
+import DB from '../Utils/db';
 
 class Main extends Component {
   constructor(props) {
@@ -47,7 +47,8 @@ class Main extends Component {
   }
 
   getMemories() {
-    api.getMemories()
+    // DB.memories.destroy();
+    DB.memories.find()
       .then((res) => {
         if (res === null) {
           console.log('No memories found');
@@ -56,34 +57,24 @@ class Main extends Component {
             dataSource: this.ds.cloneWithRows(res)
           });
         }
-      })
-      .catch((error) => {
-        console.log('Error loading memories', error);
       });
   }
 
   deleteMemory(id) {
-    api.deleteMemory(id)
+    DB.memories.removeById(id)
       .then((res) => {
         this.getMemories();
       })
-      .catch((error) => {
-        console.log('Error deleting memory', error);
-      });
   }
 
   launchPicker() {
-    ImagePickerManager.showImagePicker(ImagePickerOptions.photo, (response) => {
-      console.log('Response = ', response);
-
-      if (response.didCancel) {
+    ImagePickerManager.showImagePicker(ImagePickerOptions.photo, (res) => {
+      if (res.didCancel) {
         console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
+      } else if (res.error) {
+        console.log('ImagePickerManager Error: ', res.error);
       } else {
-        const source = {uri: response.uri.replace('file://', ''), isStatic: true};
+        const source = {uri: res.uri.replace('file://', ''), isStatic: true};
 
         this.setState({
           imageSource: source
@@ -121,7 +112,7 @@ class Main extends Component {
     });
   }
 
-  displayMemory(memory) {
+  handleDisplayMemory(memory) {
     this.props.navigator.push({
       title: 'One Memory Everyday',
       component: MemoryView,
@@ -141,15 +132,15 @@ class Main extends Component {
       text: 'Delete',
       backgroundColor: 'red',
       underlayColor: '#F8F8F8',
-      onPress: () => { this.deleteMemory(rowID) }
-    }]
+      onPress: () => { this.deleteMemory(rowData._id) }
+    }];
 
     return (
       <Swipeout right={swipeBtns}
         autoClose='true'
         backgroundColor='transparent'>
         <TouchableHighlight
-          onPress={this.displayMemory.bind(this, rowData)}
+          onPress={this.handleDisplayMemory.bind(this, rowData)}
           underlayColor='#F8F8F8'>
           <View style={styles.rowContainer}>
             {image}

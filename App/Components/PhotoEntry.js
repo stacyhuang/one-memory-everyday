@@ -11,7 +11,7 @@ import React, {
 } from 'react-native';
 
 import moment from 'moment';
-import api from '../Utils/api';
+import DB from '../Utils/db';
 
 let ScreenHeight = Dimensions.get("window").height;
 let ScreenWidth = Dimensions.get("window").width;
@@ -40,7 +40,7 @@ class PhotoEntry extends Component {
 
   handleSubmit() {
     let currentDate = moment().format("YYYY-MM-DD");
-    
+
     let memory = {
       date: currentDate,
       type: 'photo',
@@ -52,14 +52,11 @@ class PhotoEntry extends Component {
       note: ''
     })
 
-    api.addMemory(memory)
+    DB.memories.add(memory)
       .then((res) => {
         this.props.onNewEntry();
         this.props.navigator.pop();
       })
-      .catch((error) => {
-        console.log('Request failed', error);
-      });
   }
 
   render() {
