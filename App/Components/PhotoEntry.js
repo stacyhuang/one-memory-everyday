@@ -12,9 +12,11 @@ import React, {
 
 import moment from 'moment';
 import DB from '../Utils/db';
+import RNFS from 'react-native-fs';
 
 let ScreenHeight = Dimensions.get("window").height;
 let ScreenWidth = Dimensions.get("window").width;
+let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
 class PhotoEntry extends Component {
   constructor(props) {
@@ -60,8 +62,6 @@ class PhotoEntry extends Component {
   }
 
   render() {
-    // 'Warning: ScrollView doesn't take rejection well' - This is an upstream issue that hasn't been fixed
-    // https://github.com/facebook/react-native/issues/1501
     return (
       <View>
         <ScrollView style={styles.container}>
@@ -73,7 +73,7 @@ class PhotoEntry extends Component {
           autoFocus={true}
           maxLength={140}
           placeholder='Say something about this photo...' />
-          <Image source={{uri: this.props.image_url}} style={styles.photo} />
+          <Image source={{uri: imageDirPath + this.props.image_url}} style={styles.photo} />
         </ScrollView>
       </View>
     )

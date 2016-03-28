@@ -11,9 +11,11 @@ import React, {
 
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import RNFS from 'react-native-fs';
 
 let ScreenHeight = Dimensions.get("window").height;
 let ScreenWidth = Dimensions.get("window").width;
+let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
 class MemoryView extends Component {
   footer() {
@@ -29,7 +31,7 @@ class MemoryView extends Component {
   }
 
   render() {
-    let image = this.props.memory.type === 'photo' ? <Image source={{uri: this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
+    let image = this.props.memory.type === 'photo' ? <Image source={{uri: imageDirPath + this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
     let date = moment(this.props.memory.date).format('MMMM DD, YYYY');
 
     return (

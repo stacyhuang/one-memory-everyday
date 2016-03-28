@@ -16,12 +16,15 @@ import EventEmitter from 'EventEmitter';
 import Subscribable from 'Subscribable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
+import RNFS from 'react-native-fs';
 import NoteEntry from './NoteEntry';
 import PhotoEntry from './PhotoEntry';
 import MemoryView from './MemoryView';
 import Separator from './Helpers/Separator';
 import ImagePickerOptions from '../Utils/ImagePickerOptions';
 import DB from '../Utils/db';
+
+let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
 class Main extends Component {
   constructor(props) {
@@ -74,7 +77,15 @@ class Main extends Component {
       } else if (res.error) {
         console.log('ImagePickerManager Error: ', res.error);
       } else {
-        const source = {uri: res.uri.replace('file://', ''), isStatic: true};
+        let src = res.uri;
+        let index = src.indexOf('images'); // index of 'i'
+
+        if (index > -1) {
+          index += 7; // index of first character of the image name
+          src = src.slice(index);
+        }
+
+        const source = {uri: src, isStatic: true};
 
         this.setState({
           imageSource: source
@@ -125,9 +136,9 @@ class Main extends Component {
   }
 
   renderRow(rowData, sectionID, rowID) {
-    let image = rowData.image_url ? <Image source={{uri: rowData.image_url}} style={styles.photo} /> : <View></View>;
+    let image = rowData.image_url ? <Image source={{uri: imageDirPath + rowData.image_url}} style={styles.photo} /> : <View></View>;
     let date = moment(rowData.date).format('MMMM DD');
-
+    
     let swipeBtns = [{
       text: 'Delete',
       backgroundColor: 'red',
