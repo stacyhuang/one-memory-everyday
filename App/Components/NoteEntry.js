@@ -75,7 +75,7 @@ class NoteEntry extends Component {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 65,
+    marginTop: 64,
   },
   noteInput: {
     height: ScreenHeight,

@@ -24,8 +24,7 @@ class OneMemoryEveryday extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#111111',
+    flex: 1
   },
 });
 
