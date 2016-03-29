@@ -9,14 +9,9 @@ import React, {
 } from 'react-native';
 
 import moment from 'moment';
-import EventEmitter from 'EventEmitter';
-import Subscribable from 'Subscribable';
 import Swipeout from 'react-native-swipeout';
 import RNFS from 'react-native-fs';
-import NoteEntry from './NoteEntry';
-import PhotoEntry from './PhotoEntry';
 import MemoryView from './MemoryView';
-import Footer from './Footer';
 import Separator from './Helpers/Separator';
 import DB from '../Utils/db';
 
