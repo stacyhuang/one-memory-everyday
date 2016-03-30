@@ -4,7 +4,6 @@ import React, {
   View,
   TextInput,
   Dimensions,
-  TouchableHighlight,
   StyleSheet
 } from 'react-native';
 
@@ -22,11 +21,11 @@ class NoteEntry extends Component {
   }
 
   componentDidMount() {
-    this.props.events.addListener('submitNewEntry', this.handleSubmit.bind(this));
+    this.props.eventEmitter.addListener('submitNewEntry', this.handleSubmit.bind(this));
   }
 
   componentWillUnmount() {
-    this.props.events.removeAllListeners();
+    this.props.eventEmitter.removeAllListeners();
   }
 
   handleChange(event) {
@@ -48,11 +47,9 @@ class NoteEntry extends Component {
       note: ''
     });
 
-
     DB.memories.add(memory)
       .then((res) => {
-        this.props.onNewEntry();
-        this.props.navigator.pop();
+        this.props.routeToHome();
       })
   }
 
@@ -76,14 +73,15 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 64,
+    marginBottom: 49
   },
   noteInput: {
+    flex: 1,
     height: ScreenHeight,
     padding: 10,
     fontSize: 18,
-    color: '#111',
+    color: '#111'
   }
 });
-
 
 module.exports = NoteEntry;

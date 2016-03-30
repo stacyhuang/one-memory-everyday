@@ -18,33 +18,20 @@ let ScreenWidth = Dimensions.get("window").width;
 let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
 class MemoryView extends Component {
-  footer() {
-    return (
-      <View style={styles.footerContainer}>
-        <TouchableHighlight
-          style={styles.footerButton}
-          underlayColor='#88D4F5'>
-            <Icon name="share" style={styles.footerButtonText}/>
-        </TouchableHighlight>
-      </View>
-    )
-  }
-
   render() {
     let image = this.props.memory.type === 'photo' ? <Image source={{uri: imageDirPath + this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
     let date = moment(this.props.memory.date).format('MMMM DD, YYYY');
 
     return (
-      <View style={styles.container}>
-        <ScrollView>
-          {image}
-          <View style={styles.containerBottom}>
-            <Text style={styles.dateContainer}>{date}</Text>
-            <Text style={styles.noteContainer}>{this.props.memory.text}</Text>
-          </View>
-        </ScrollView>
-        {this.footer()}
-      </View>
+      <ScrollView
+        style={styles.container}
+        automaticallyAdjustContentInsets={false}>
+        {image}
+        <View style={styles.containerBottom}>
+          <Text style={styles.dateContainer}>{date}</Text>
+          <Text style={styles.noteContainer}>{this.props.memory.text}</Text>
+        </View>
+      </ScrollView>
     )
   }
 }
@@ -53,7 +40,8 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    height: ScreenHeight,
+    marginTop: 64,
+    marginBottom: 49
   },
   photo: {
     height: ScreenWidth
@@ -70,21 +58,6 @@ var styles = StyleSheet.create({
   },
   noteContainer: {
     fontSize: 20,
-  },
-  footerContainer: {
-    backgroundColor: '#272727',
-    flexDirection: 'row',
-    justifyContent: 'flex-end'
-  },
-  footerButton: {
-    width: 50,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  footerButtonText: {
-    fontSize: 24, // size of icon
-    color: 'white'
   }
 });
 

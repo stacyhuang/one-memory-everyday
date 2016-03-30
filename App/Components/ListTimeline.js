@@ -18,23 +18,54 @@ import DB from '../Utils/db';
 let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
 class ListTimeline extends Component {
+  constructor(props) {
+    super(props);
+
+    this.ds = new ListView.DataSource({
+      rowHasChanged: (row1, row2) => row1 !== row2
+    });
+
+    this.state = {
+      view: 'list',
+      dataSource: this.ds.cloneWithRows([]),
+      imageSource: null
+    }
+  }
+
+  componentWillMount() {
+    this.getMemories();
+  }
+
+  getMemories() {
+    // DB.memories.destroy();
+    DB.memories.find()
+      .then((res) => {
+        if (res === null) {
+          this.setState({
+            dataSource: this.ds.cloneWithRows([])
+          });
+        } else {
+          this.setState({
+            dataSource: this.ds.cloneWithRows(res)
+          });
+        }
+      });
+  }
+
   deleteMemory(id) {
     DB.memories.removeById(id)
       .then((res) => {
-        this.props.getMemories();
+        this.getMemories();
       })
   }
 
-  routeToMemory(memory) {
+  _navigate(memory) {
     this.props.navigator.push({
-      title: 'One Memory Everyday',
       component: MemoryView,
-      leftButtonTitle: 'Back',
-      onLeftButtonPress: () => this.props.navigator.pop(),
       passProps: {
         memory: memory
       }
-    });
+    })
   }
 
   renderRow(rowData, sectionID, rowID) {
@@ -53,7 +84,7 @@ class ListTimeline extends Component {
         autoClose='true'
         backgroundColor='transparent'>
         <TouchableHighlight
-          onPress={this.routeToMemory.bind(this, rowData)}
+          onPress={this._navigate.bind(this, rowData)}
           underlayColor='#F8F8F8'>
           <View style={styles.rowContainer}>
             {image}
@@ -73,7 +104,7 @@ class ListTimeline extends Component {
       <ListView
         style={styles.container}
         automaticallyAdjustContentInsets={false}
-        dataSource={this.props.dataSource}
+        dataSource={this.state.dataSource}
         renderRow={this.renderRow.bind(this)} />
     )
   }
@@ -83,6 +114,7 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 64,
+    marginBottom: 49
   },
   rowContainer: {
     flexDirection: 'row',

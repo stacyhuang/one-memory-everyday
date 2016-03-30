@@ -5,8 +5,6 @@ import React, {
   Image,
   TextInput,
   Dimensions,
-  TouchableHighlight,
-  ScrollView,
   StyleSheet
 } from 'react-native';
 
@@ -27,11 +25,11 @@ class PhotoEntry extends Component {
   }
 
   componentDidMount() {
-    this.props.events.addListener('submitNewEntry', this.handleSubmit.bind(this));
+    this.props.eventEmitter.addListener('submitNewEntry', this.handleSubmit.bind(this));
   }
 
   componentWillUnmount() {
-    this.props.events.removeAllListeners();
+    this.props.eventEmitter.removeAllListeners();
   }
 
   handleChange(event) {
@@ -56,25 +54,22 @@ class PhotoEntry extends Component {
 
     DB.memories.add(memory)
       .then((res) => {
-        this.props.onNewEntry();
-        this.props.navigator.pop();
+        this.props.routeToHome();
       })
   }
 
   render() {
     return (
-      <View>
-        <ScrollView style={styles.container}>
-          <TextInput
-          style={styles.noteInput}
-          value={this.state.note}
-          onChange={this.handleChange.bind(this)}
-          multiline={true}
-          autoFocus={true}
-          maxLength={140}
-          placeholder='Say something about this photo...' />
-          <Image source={{uri: imageDirPath + this.props.image_url}} style={styles.photo} />
-        </ScrollView>
+      <View style={styles.container}>
+        <TextInput
+        style={styles.noteInput}
+        value={this.state.note}
+        onChange={this.handleChange.bind(this)}
+        multiline={true}
+        autoFocus={true}
+        maxLength={140}
+        placeholder='Say something about this photo...' />
+        <Image source={{uri: imageDirPath + this.props.image_url}} style={styles.photo} />
       </View>
     )
   }
@@ -84,13 +79,14 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    height: ScreenHeight
+    marginTop: 64,
+    marginBottom: 49
   },
   noteInput: {
     height: 110,
     padding: 10,
     fontSize: 18,
-    color: '#111',
+    color: '#111'
   },
   photo: {
     width: ScreenWidth,

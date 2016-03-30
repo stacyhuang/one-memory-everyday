@@ -18,23 +18,44 @@ let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 let ScreenWidth = Dimensions.get("window").width;
 
 class PhotoTimeline extends Component {
-  deleteMemory(id) {
-    DB.memories.removeById(id)
-      .then((res) => {
-        this.props.getMemories();
-      })
+  constructor(props) {
+    super(props);
+
+    this.ds = new ListView.DataSource({
+      rowHasChanged: (row1, row2) => row1 !== row2
+    });
+
+    this.state = {
+      view: 'list',
+      dataSource: this.ds.cloneWithRows([]),
+      imageSource: null
+    }
   }
 
-  routeToMemory(memory) {
+  componentWillMount() {
+    this.getMemories();
+  }
+
+  getMemories() {
+    DB.memories.find()
+      .then((res) => {
+        if (res === null) {
+          console.log('No memories found');
+        } else {
+          this.setState({
+            dataSource: this.ds.cloneWithRows(res)
+          });
+        }
+      });
+  }
+
+  _navigate(memory) {
     this.props.navigator.push({
-      title: 'One Memory Everyday',
       component: MemoryView,
-      leftButtonTitle: 'Back',
-      onLeftButtonPress: () => this.props.navigator.pop(),
       passProps: {
         memory: memory
       }
-    });
+    })
   }
 
   renderRow(rowData, sectionID, rowID) {
@@ -43,7 +64,7 @@ class PhotoTimeline extends Component {
     return (
       <View>
         <TouchableHighlight
-          onPress={this.routeToMemory.bind(this, rowData)}
+          onPress={this._navigate.bind(this, rowData)}
           underlayColor='#F8F8F8'>
           <View style={styles.rowContainer}>
             {image}
@@ -59,7 +80,7 @@ class PhotoTimeline extends Component {
       <ListView
         contentContainerStyle={styles.list}
         automaticallyAdjustContentInsets={false}
-        dataSource={this.props.dataSource}
+        dataSource={this.state.dataSource}
         renderRow={this.renderRow.bind(this)} />
     )
   }
@@ -69,6 +90,7 @@ var styles = StyleSheet.create({
   list: {
     flex: 1,
     marginTop: 64,
+    marginBottom: 49,
     padding: 7.5,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
