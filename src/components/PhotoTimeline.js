@@ -9,6 +9,9 @@ import React, {
   TouchableHighlight,
 } from 'react-native';
 
+import * as memoryActions from '../actions/memoryActions';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import RNFS from 'react-native-fs';
 import MemoryView from './MemoryView';
 import Separator from './Helpers/Separator';
@@ -21,32 +24,9 @@ class PhotoTimeline extends Component {
   constructor(props) {
     super(props);
 
-    this.ds = new ListView.DataSource({
+    this.dataSource = new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2
     });
-
-    this.state = {
-      view: 'list',
-      dataSource: this.ds.cloneWithRows([]),
-      imageSource: null
-    }
-  }
-
-  componentWillMount() {
-    this.getMemories();
-  }
-
-  getMemories() {
-    DB.memories.find()
-      .then((res) => {
-        if (res === null) {
-          console.log('No memories found');
-        } else {
-          this.setState({
-            dataSource: this.ds.cloneWithRows(res)
-          });
-        }
-      });
   }
 
   _navigate(memory) {
@@ -76,11 +56,13 @@ class PhotoTimeline extends Component {
   }
 
   render() {
+    const dataSource = this.dataSource.cloneWithRows(this.props.memory);
+
     return (
       <ListView
         contentContainerStyle={styles.list}
         automaticallyAdjustContentInsets={false}
-        dataSource={this.state.dataSource}
+        dataSource={dataSource}
         renderRow={this.renderRow.bind(this)} />
     )
   }
@@ -108,4 +90,16 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = PhotoTimeline;
+const mapStateToProps = (state) => {
+  return {
+    memory: state.memory
+  }
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators(memoryActions, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PhotoTimeline);

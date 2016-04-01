@@ -1,0 +1,3 @@
+export const ADD_MEMORY = 'ADD_MEMORY';
+export const DELETE_MEMORY = 'DELETE_MEMORY';
+export const RECEIVE_MEMORY = 'RECEIVE_MEMORY';

@@ -9,7 +9,6 @@ import React, {
   NativeModules
 } from 'react-native';
 
-const ImagePickerManager = NativeModules.ImagePickerManager;
 import ImagePickerOptions from '../Utils/ImagePickerOptions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import EventEmitter from 'EventEmitter';
@@ -19,6 +18,8 @@ import PhotoTimeline from './PhotoTimeline';
 import MemoryView from './MemoryView';
 import PhotoEntry from './PhotoEntry';
 import NoteEntry from './NoteEntry';
+
+const ImagePickerManager = NativeModules.ImagePickerManager;
 
 class App extends Component {
   constructor() {
@@ -80,7 +81,7 @@ class App extends Component {
           component: component,
           passProps: {
             eventEmitter: this.eventEmitter,
-            routeToHome: this.routeToHome.bind(this),
+            routeToHome: this.routeToHome.bind(this)
           },
           onRightButtonPress: this.onSubmitNewEntry.bind(this),
           onLeftButtonPress: this.routeToHome.bind(this),
@@ -121,18 +122,9 @@ class App extends Component {
     });
   }
 
-  // Todo: Need to reset PhotoTimeline as well
   routeToHome() {
     this.setState(
-      {selectedTab: 'timeline'},
-      () => {
-        this.refs.timelineRef.resetTo({
-          component: ListTimeline,
-          passProps: {
-            eventEmitter: this.eventEmitter,
-          }
-        });
-      }
+      {selectedTab: 'timeline'}
     );
   }
 

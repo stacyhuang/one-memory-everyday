@@ -19,7 +19,7 @@ let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
 class MemoryView extends Component {
   render() {
-    let image = this.props.memory.type === 'photo' ? <Image source={{uri: imageDirPath + this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
+    let image = this.props.memory.memory_type === 'photo' ? <Image source={{uri: imageDirPath + this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
     let date = moment(this.props.memory.date).format('MMMM DD, YYYY');
 
     return (

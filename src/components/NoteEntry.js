@@ -7,6 +7,9 @@ import React, {
   StyleSheet
 } from 'react-native';
 
+import * as memoryActions from '../actions/memoryActions';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import moment from 'moment';
 import DB from '../Utils/db';
 
@@ -39,7 +42,7 @@ class NoteEntry extends Component {
 
     let memory = {
       date: currentDate,
-      type: 'note',
+      memory_type: 'note',
       text: this.state.note
     };
 
@@ -47,10 +50,8 @@ class NoteEntry extends Component {
       note: ''
     });
 
-    DB.memories.add(memory)
-      .then((res) => {
-        this.props.routeToHome();
-      })
+    this.props.actions.addToDB(memory);
+    this.props.routeToHome();
   }
 
   render() {
@@ -84,4 +85,10 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = NoteEntry;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators(memoryActions, dispatch)
+  }
+}
+
+export default connect(null, mapDispatchToProps)(NoteEntry);

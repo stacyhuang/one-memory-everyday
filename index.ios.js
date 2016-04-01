@@ -1,7 +1,4 @@
-import React, {
-  AppRegistry,
-} from 'react-native';
+import React, { AppRegistry } from 'react-native';
+import Root from './src/containers/root';
 
-import App from './App/Components/App';
-
-AppRegistry.registerComponent('OneMemoryEveryday', () => App);
+AppRegistry.registerComponent('OneMemoryEveryday', () => Root);

@@ -8,6 +8,9 @@ import React, {
   StyleSheet
 } from 'react-native';
 
+import * as memoryActions from '../actions/memoryActions';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import moment from 'moment';
 import DB from '../Utils/db';
 import RNFS from 'react-native-fs';
@@ -43,19 +46,17 @@ class PhotoEntry extends Component {
 
     let memory = {
       date: currentDate,
-      type: 'photo',
+      memory_type: 'photo',
       image_url: this.props.image_url,
       text: this.state.note
     };
 
     this.setState({
       note: ''
-    })
+    });
 
-    DB.memories.add(memory)
-      .then((res) => {
-        this.props.routeToHome();
-      })
+    this.props.actions.addToDB(memory);
+    this.props.routeToHome();
   }
 
   render() {
@@ -94,4 +95,10 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = PhotoEntry;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators(memoryActions, dispatch)
+  }
+}
+
+export default connect(null, mapDispatchToProps)(PhotoEntry);

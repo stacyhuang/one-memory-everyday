@@ -5,9 +5,12 @@ import React, {
   Image,
   StyleSheet,
   ListView,
-  TouchableHighlight,
+  TouchableHighlight
 } from 'react-native';
 
+import * as memoryActions from '../actions/memoryActions';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import moment from 'moment';
 import Swipeout from 'react-native-swipeout';
 import RNFS from 'react-native-fs';
@@ -21,42 +24,19 @@ class ListTimeline extends Component {
   constructor(props) {
     super(props);
 
-    this.ds = new ListView.DataSource({
+    this.dataSource = new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2
     });
-
-    this.state = {
-      view: 'list',
-      dataSource: this.ds.cloneWithRows([]),
-      imageSource: null
-    }
   }
 
   componentWillMount() {
-    this.getMemories();
-  }
-
-  getMemories() {
+    this.props.actions.fetchFromDB();
     // DB.memories.destroy();
-    DB.memories.find()
-      .then((res) => {
-        if (res === null) {
-          this.setState({
-            dataSource: this.ds.cloneWithRows([])
-          });
-        } else {
-          this.setState({
-            dataSource: this.ds.cloneWithRows(res)
-          });
-        }
-      });
   }
 
   deleteMemory(id) {
-    DB.memories.removeById(id)
-      .then((res) => {
-        this.getMemories();
-      })
+    this.props.actions.deleteFromDB(id);
+    // DB.memories.removeById(id);
   }
 
   _navigate(memory) {
@@ -88,7 +68,7 @@ class ListTimeline extends Component {
           underlayColor='#F8F8F8'>
           <View style={styles.rowContainer}>
             {image}
-            <View style={[styles.rowContainerRight, rowData.type === 'photo' && styles.rowContainerRightWithPhoto]}>
+            <View style={[styles.rowContainerRight, rowData.memory_type === 'photo' && styles.rowContainerRightWithPhoto]}>
               <Text style={styles.noteContainer}>{rowData.text}</Text>
               <Text style={styles.dateContainter}>{date}</Text>
             </View>
@@ -100,11 +80,13 @@ class ListTimeline extends Component {
   }
 
   render() {
+    const dataSource = this.dataSource.cloneWithRows(this.props.memory);
+
     return (
       <ListView
         style={styles.container}
         automaticallyAdjustContentInsets={false}
-        dataSource={this.state.dataSource}
+        dataSource={dataSource}
         renderRow={this.renderRow.bind(this)} />
     )
   }
@@ -157,4 +139,16 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = ListTimeline;
+const mapStateToProps = (state) => {
+  return {
+    memory: state.memory
+  }
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators(memoryActions, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ListTimeline);
