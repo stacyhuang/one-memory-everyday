@@ -42,12 +42,11 @@ class Entry extends Component {
   handleSubmit() {
     let currentDate = moment().format("YYYY-MM-DD");
     let { image_url, memory_type, actions } = this.props;
-    image_url = image_url || '';
 
     let memory = {
       date: currentDate,
       memory_type: memory_type,
-      image_url: image_url,
+      image_url: image_url || '',
       text: this.state.note
     };
 
@@ -76,9 +75,8 @@ Entry.propTypes = {
   image_url: PropTypes.string,
   memory_type: PropTypes.string.isRequired,
   actions: PropTypes.object.isRequired,
-  // eventEmitter: ?
+  // eventEmitter:
 };
-
 
 var styles = StyleSheet.create({
   container: {
