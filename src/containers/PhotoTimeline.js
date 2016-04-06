@@ -9,12 +9,12 @@ import React, {
   TouchableHighlight,
 } from 'react-native';
 
-import * as memoryActions from '../actions/memoryActions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import RNFS from 'react-native-fs';
-import MemoryView from './MemoryView';
-import Separator from './Helpers/Separator';
+import * as memoryActions from '../actions/memoryActions';
+import Memory from '../components/Memory';
+import Separator from '../components/Helpers/Separator';
 import DB from '../Utils/db';
 
 let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
@@ -31,7 +31,7 @@ class PhotoTimeline extends Component {
 
   _navigate(memory) {
     this.props.navigator.push({
-      component: MemoryView,
+      component: Memory,
       passProps: {
         memory: memory
       }

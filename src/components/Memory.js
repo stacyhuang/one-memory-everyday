@@ -6,7 +6,8 @@ import React, {
   Dimensions,
   ScrollView,
   TouchableHighlight,
-  StyleSheet
+  StyleSheet,
+  PropTypes
 } from 'react-native';
 
 import moment from 'moment';
@@ -17,10 +18,11 @@ let ScreenHeight = Dimensions.get("window").height;
 let ScreenWidth = Dimensions.get("window").width;
 let imageDirPath = RNFS.DocumentDirectoryPath + '/images/';
 
-class MemoryView extends Component {
+class Memory extends Component {
   render() {
-    let image = this.props.memory.memory_type === 'photo' ? <Image source={{uri: imageDirPath + this.props.memory.image_url}} style={styles.photo} /> : <View></View>;
-    let date = moment(this.props.memory.date).format('MMMM DD, YYYY');
+    let { memory } = this.props;
+    let image = memory.memory_type === 'photo' ? <Image source={{uri: imageDirPath + memory.image_url}} style={styles.photo} /> : <View></View>;
+    let date = moment(memory.date).format('MMMM DD, YYYY');
 
     return (
       <ScrollView
@@ -29,12 +31,22 @@ class MemoryView extends Component {
         {image}
         <View style={styles.containerBottom}>
           <Text style={styles.dateContainer}>{date}</Text>
-          <Text style={styles.noteContainer}>{this.props.memory.text}</Text>
+          <Text style={styles.noteContainer}>{memory.text}</Text>
         </View>
       </ScrollView>
     )
   }
 }
+
+Memory.propTypes = {
+  memory: PropTypes.shape({
+    date: PropTypes.string,
+    memory_type: PropTypes.string,
+    image_url: PropTypes.string,
+    text: PropTypes.string,
+    _id: PropTypes.number
+  }).isRequired
+};
 
 var styles = StyleSheet.create({
   container: {
@@ -61,4 +73,4 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = MemoryView;
+module.exports = Memory;

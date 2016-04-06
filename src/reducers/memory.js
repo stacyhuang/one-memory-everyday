@@ -9,12 +9,11 @@ export default function memory(state, action) {
     case types.ADD_MEMORY:
       return state.concat(
         [{
-            type: action.type,
             date: action.date,
             memory_type: action.memory_type,
             image_url: action.image_url,
             text: action.text,
-            id: action.id
+            _id: action._id
         }]
       )
 

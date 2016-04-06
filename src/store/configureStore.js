@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
-import reducer from './reducers';
+import reducer from '../reducers';
 
 /*
 createStore creates a Redux store that holds the complete
@@ -16,10 +16,10 @@ only if a certain condition is met. The iner function receives
 the store methods dispatch and getState() as parameters.
 */
 
-export default function configureStore(initialState) {
+export default function configureStore(initiatState) {
   return createStore(
     reducer,
-    initialState,
+    initiatState,
     applyMiddleware(thunk)
   );
 }

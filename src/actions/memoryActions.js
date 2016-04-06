@@ -8,7 +8,7 @@ export function addMemory(memory) {
     memory_type: memory.memory_type,
     image_url: memory.image_url,
     text: memory.text,
-    id: memory._id
+    _id: memory._id
   };
 }
 

@@ -9,32 +9,27 @@ import React, {
   NativeModules
 } from 'react-native';
 
-import ImagePickerOptions from '../Utils/ImagePickerOptions';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import EventEmitter from 'EventEmitter';
 import Subscribable from 'Subscribable';
+import * as displayTabActions from '../actions/displayTabActions';
+import ImagePickerOptions from '../Utils/ImagePickerOptions';
 import ListTimeline from './ListTimeline';
 import PhotoTimeline from './PhotoTimeline';
-import MemoryView from './MemoryView';
-import PhotoEntry from './PhotoEntry';
-import NoteEntry from './NoteEntry';
+import EntryContainer from './EntryContainer';
 
 const ImagePickerManager = NativeModules.ImagePickerManager;
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      selectedTab: 'timeline'
-    }
-  }
-
   componentWillMount() {
     this.eventEmitter = new EventEmitter();
   }
 
   onSubmitNewEntry() {
-    this.eventEmitter.emit('submitNewEntry');
+    this.eventEmitter.emit('onSubmitNewEntry');
+    this.routeToHome();
   }
 
   renderScene(route, navigator) {
@@ -49,7 +44,7 @@ class App extends Component {
   configureScene(route, navigator) {
     return {
       ...Navigator.SceneConfigs.HorizontalSwipeJump,
-      gestures: false // turn off navigator swipe gesture in order to enable react-native-swipeout
+      gestures: false // turn off navigator swipe gesture to enable react-native-swipeout
     }
   }
 
@@ -58,8 +53,33 @@ class App extends Component {
       <Navigator
         style={styles.container}
         ref={ref}
+        initialRoute={{component: component}}
+        renderScene={this.renderScene}
+        configureScene={this.configureScene}
+        navigationBar={
+          <Navigator.NavigationBar
+            style={styles.nav}
+            routeMapper={NavigationBarRouteMapper} />
+        }
+      />
+    )
+  }
+
+  renderNewEntryView(memory_type, ref) {
+    return (
+      <Navigator
+        style={styles.container}
+        ref={ref}
         initialRoute={{
-          component: component
+          component: EntryContainer,
+          passProps: {
+            eventEmitter: this.eventEmitter,
+            memory_type: memory_type
+          },
+          rightText: 'Submit',
+          onRightButtonPress: this.onSubmitNewEntry.bind(this),
+          leftText: 'Cancel',
+          onLeftButtonPress: this.routeToHome.bind(this)
         }}
         renderScene={this.renderScene}
         configureScene={this.configureScene}
@@ -72,31 +92,23 @@ class App extends Component {
     )
   }
 
-  renderNewEntryView(component, ref) {
-    return (
-      <Navigator
-        style={styles.container}
-        ref={ref}
-        initialRoute={{
-          component: component,
-          passProps: {
-            eventEmitter: this.eventEmitter,
-            routeToHome: this.routeToHome.bind(this)
-          },
-          onRightButtonPress: this.onSubmitNewEntry.bind(this),
-          onLeftButtonPress: this.routeToHome.bind(this),
-          rightText: 'Submit',
-          leftText: 'Cancel'
-        }}
-        renderScene={this.renderScene}
-        configureScene={this.configureScene}
-        navigationBar={
-          <Navigator.NavigationBar
-            style={styles.nav}
-            routeMapper={NavigationBarRouteMapper} />
-        }
-      />
-    )
+  routeToHome() {
+    this.props.actions.setSelectedTab('timeline');
+  }
+
+  routeToPhotoEntry(source) {
+    this.refs.newPhotoRef.resetTo({
+      component: EntryContainer,
+      passProps: {
+        eventEmitter: this.eventEmitter,
+        image_url: source.uri,
+        memory_type: 'photo',
+      },
+      rightText: 'Submit',
+      onRightButtonPress: this.onSubmitNewEntry.bind(this),
+      leftText: 'Cancel',
+      onLeftButtonPress: this.routeToHome.bind(this)
+    })
   }
 
   launchPicker() {
@@ -114,39 +126,16 @@ class App extends Component {
           src = src.slice(index);
         }
 
-        this.setState({
-          selectedTab: 'newPhoto'},
-          () => this.routeToPhotoEntry({uri: src, isStatic: true})
-        );
+        this.props.actions.setSelectedTab('newPhoto');
+        this.routeToPhotoEntry({uri: src, isStatic: true})
       }
     });
   }
 
-  routeToHome() {
-    this.setState(
-      {selectedTab: 'timeline'}
-    );
-  }
-
-  routeToPhotoEntry(source) {
-    this.refs.newPhotoRef.resetTo({
-      component: PhotoEntry,
-      passProps: {
-        eventEmitter: this.eventEmitter,
-        image_url: source.uri,
-        routeToHome: this.routeToHome.bind(this)
-      },
-      onRightButtonPress: this.onSubmitNewEntry.bind(this),
-      onLeftButtonPress: this.routeToHome.bind(this),
-      rightText: 'Submit',
-      leftText: 'Cancel'
-    })
-  }
-
   setTab(tab) {
-    if (this.state.selectedTab !== tab) {
-      this.setState({selectedTab: tab})
-    } else if (this.state.selectedTab === tab) {
+    if (this.props.displayTab !== tab) {
+      this.props.actions.setSelectedTab(tab);
+    } else {
       let tabName = tab + 'Ref';
       this.refs[tabName].popToTop();
     }
@@ -158,30 +147,33 @@ class App extends Component {
         <Icon.TabBarItemIOS
           title="Timeline"
           iconName="th-list"
-          selected={this.state.selectedTab === 'timeline'}
+          selected={this.props.displayTab === 'timeline'}
           onPress={() => this.setTab('timeline')}>
           {this.renderTimelineView(ListTimeline, 'timelineRef')}
         </Icon.TabBarItemIOS>
+
         <Icon.TabBarItemIOS
           title="Grid"
           iconName="th"
-          selected={this.state.selectedTab === 'grid'}
+          selected={this.props.displayTab === 'grid'}
           onPress={() => this.setTab('grid')}>
           {this.renderTimelineView(PhotoTimeline, 'gridRef')}
         </Icon.TabBarItemIOS>
+
         <Icon.TabBarItemIOS
           title="New Note"
           iconName="pencil"
-          selected={this.state.selectedTab === 'newNote'}
+          selected={this.props.displayTab === 'newNote'}
           onPress={() => this.setTab('newNote')}>
-          {this.renderNewEntryView(NoteEntry, 'newNoteRef')}
+          {this.renderNewEntryView('note', 'newNoteRef')}
         </Icon.TabBarItemIOS>
+
         <Icon.TabBarItemIOS
           title="New Photo"
           iconName="camera-retro"
-          selected={this.state.selectedTab === 'newPhoto'}
+          selected={this.props.displayTab === 'newPhoto'}
           onPress={() => this.launchPicker()}>
-          {this.renderNewEntryView(PhotoEntry, 'newPhotoRef')}
+          {this.renderNewEntryView('photo', 'newPhotoRef')}
         </Icon.TabBarItemIOS>
       </TabBarIOS>
     );
@@ -201,11 +193,11 @@ const NavigationBarRouteMapper = {
     } else if(route.onLeftButtonPress) {
       return (
         <TouchableHighlight
-        underlayColor="transparent"
-        onPress={() => route.onLeftButtonPress()}>
-        <Text style={ styles.leftNavButtonText }>
-        { route.leftText || 'Left Button' }
-        </Text>
+          underlayColor="transparent"
+          onPress={() => route.onLeftButtonPress()}>
+          <Text style={ styles.leftNavButtonText }>
+            { route.leftText || 'Left Button' }
+          </Text>
         </TouchableHighlight>
       )
     } else {
@@ -252,4 +244,16 @@ const styles = StyleSheet.create({
   }
 });
 
-module.exports = App;
+const mapStateToProps = (state) => {
+  return {
+    displayTab: state.displayTab
+  }
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators(displayTabActions, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
